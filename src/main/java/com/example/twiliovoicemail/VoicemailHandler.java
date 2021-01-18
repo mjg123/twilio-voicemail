@@ -2,12 +2,15 @@ package com.example.twiliovoicemail;
 
 import com.twilio.Twilio;
 import com.twilio.http.HttpMethod;
+import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.twiml.VoiceResponse;
 import com.twilio.twiml.voice.Dial;
 import com.twilio.twiml.voice.Pause;
-import com.twilio.twiml.voice.Play;
 import com.twilio.twiml.voice.Record;
+import com.twilio.twiml.voice.Play;
+import com.twilio.type.PhoneNumber;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,5 +59,23 @@ public class VoicemailHandler {
                 .build())
             .build().toXml();
     }
+
+    @PostMapping("/recordings")
+    public void handleRecording(
+        @RequestParam("RecordingUrl") String requestUrl,
+        @RequestParam("From") String callerNumber,
+        @RequestParam("To") String twilioNumber){
+
+        String mp3RecordingUrl = requestUrl + ".mp3";
+
+        String smsNotification = String.format("You got an answerphone message from %s - listen here: %s", callerNumber, mp3RecordingUrl);
+
+        Message.creator(
+            new PhoneNumber(MY_CELLPHONE_NUMBER),
+            new PhoneNumber(twilioNumber),
+            smsNotification)
+            .create();
+    }
+
 
 }
